@@ -1,0 +1,11 @@
+base_path: '/data/pet_ML/groupLe_recsys/gl/'
+dataset: '30k'
+regularization: 0.05
+alpha: 10
+factors: 15
+iterations: 1
+
+data:
+    user_id_field: 'user_id'
+    item_id_field: 'item_id'
+    rate_field: 'rate'
