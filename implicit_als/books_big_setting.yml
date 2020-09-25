@@ -1,0 +1,15 @@
+path: '/data/groupLe_recsys/books/views.csv'
+
+
+regularization: 0.01
+alpha: 10
+factors: 50
+iterations: 20
+
+data:
+    user_id_field: 'user_id'
+    item_id_field: 'item_id'
+    rate_field: 'rate'
+    
+testing:
+    test_samples: 2

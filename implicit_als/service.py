@@ -32,6 +32,9 @@ def prepare_model(train_df, config):
 def get_top_popular(n):
     return top_popular[:n]
 
+from datetime import datetime as dt
+time = lambda: '[%s]' % dt.now().strftime('%H:%M:%S')
+
 
 app = Flask(__name__)
 
@@ -47,6 +50,10 @@ def hello():
     # Process request arguments
     uid = request.args.get('user_id', None)
     n_rec = int(request.args.get('n_recs', 5))
+    
+    with open('usage.log', 'a') as f:
+        f.write('[%s] /recommend user_id=%s n_recs=%s' % (time(), str(uid), str(n_rec)))
+    
     if not uid:
         return jsonify({'error': 'no user_id provided', 'args': request.args})
     if not all(list(map(str.isdigit, uid))):
@@ -86,7 +93,6 @@ def recalc():
 
 if __name__ == "__main__":
     config = Hparam('./dorama_setting.yml')
-#     path = config.path or config.base_path + config.dataset + '/'
     loader = Loader(config.path)
     df = loader.get_views_from_file(config.path)
     top_popular = df.groupby(config.data.item_id_field).count()['rate'].sort_values(ascending=False).index.tolist()[:100]

@@ -1,23 +1,20 @@
 import pandas as pd
 from tqdm import tqdm
 from yamlparams.utils import Hparam
+import sys
 
 from metrics import mean_average_presision_k, hitrate_k, novelty, coverage
 from dataloader import Loader
 from preprocessor import Preprocessor
 from model import ImplicitALS
 
-regularization = 0.05
-alpha = 10
-factors = 10#0
-iterations = 10
-ks = [10, 30]#, 50]
 
-
-# Load data
-path = '/data/pet_ML/groupLe_recsys/gl/'
-df_prefix = '900k/'
-loader = Loader(path + df_prefix)
+if len(sys.argv) < 2:
+    raise AttributeError('Use config name to define model config')
+cfg_path = sys.argv[1] #'books_big_setting.yml'
+print(cfg_path,' cfg')
+config = Hparam(cfg_path)
+loader = Loader(config.path.replace('views.csv', ''))
 preprocessor = Preprocessor()
 
 
@@ -37,7 +34,7 @@ print('Train df contains', train_df.shape[0], 'items')
 
 
 
-config = Hparam('./experiment.yml')
+# config = Hparam('./experiment.yml')
 model = ImplicitALS(train_df, config)
 model.fit()
 
@@ -46,13 +43,13 @@ model.fit()
 ## calc recommendations
 rec_items = []
 uixs = []
-for uix in tqdm(range(0, train_df.user_id.max()+1,40)):
+for uix in tqdm(range(0, train_df.user_id.max()+1,1)):
     uixs.append(uix)
-    rec_items.append(model.recommend_user(uix, max(ks)))
+    rec_items.append(model.recommend_user(uix, config.testing.test_samples))
 gt = test_df[test_df.user_id.isin(uixs)].groupby('user_id')['item_id'].apply(list).tolist()
 
 ## calc metrics
-for k in ks:
+for k in [config.testing.test_samples//2, config.testing.test_samples]:
     print('\nMAP@%d' % k,    round(mean_average_presision_k(rec_items, gt, k=k), 5))
     print('Hitrate@%d' % k,  round(hitrate_k(rec_items, gt, k=k), 4))
     print('Novelty@%d' % k,  round(novelty(rec_items, k), 2))
