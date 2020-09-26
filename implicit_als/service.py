@@ -99,7 +99,7 @@ if __name__ == "__main__":
     port = sys.argv[2]
     
     
-    config = Hparam('./dorama_setting.yml')
+    config = Hparam(cfg_path)
     loader = Loader(config.path)
     df = loader.get_views_from_file(config.path)
     top_popular = df.groupby(config.data.item_id_field).count()['rate'].sort_values(ascending=False).index.tolist()[:100]

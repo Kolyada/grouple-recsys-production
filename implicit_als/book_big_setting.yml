@@ -1,4 +1,4 @@
-path: '/data/groupLe_recsys/books/views.csv'
+path: '/data/groupLe_recsys/book/views.csv'
 
 
 regularization: 0.01
