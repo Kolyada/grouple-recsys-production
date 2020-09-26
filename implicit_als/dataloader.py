@@ -21,7 +21,7 @@ class Loader:
     
     def get_views_from_file(self, path):
         df = pd.read_csv(path, header=None)
-        df.columns = 'item_id rate user_id status date_created'.split()
+        df.columns = 'item_id rate user_id'.split()
         df = df[~df.rate.isna()]
         return df
     
