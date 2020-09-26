@@ -1,3 +1,4 @@
+import sys
 import pandas as pd
 from tqdm import tqdm
 from flask import Flask, request, jsonify, render_template
@@ -92,10 +93,16 @@ def recalc():
         
 
 if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        raise AttributeError('Use config name to define model config and port to define service port')
+    cfg_path = sys.argv[1] #'books_big_setting.yml'
+    port = sys.argv[2]
+    
+    
     config = Hparam('./dorama_setting.yml')
     loader = Loader(config.path)
     df = loader.get_views_from_file(config.path)
     top_popular = df.groupby(config.data.item_id_field).count()['rate'].sort_values(ascending=False).index.tolist()[:100]
     
     mapper, model = prepare_model(df, config)
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=int(port))
