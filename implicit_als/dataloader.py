@@ -20,8 +20,7 @@ class Loader:
         return df1.append(df2).sort_values(by='user_id')
     
     def get_views_from_file(self, path):
-        df = pd.read_csv(path, header=None)
-        df.columns = 'item_id rate user_id'.split()
+        df = pd.read_csv(path, dtype=int)
         df = df[~df.rate.isna()]
         return df
     
