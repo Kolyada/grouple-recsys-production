@@ -52,7 +52,7 @@ def hello():
     uid = request.args.get('user_id', None)
     n_rec = int(request.args.get('n_recs', 5))
     
-    with open('usage.log', 'a') as f:
+    with open(config.name+'-usage.log', 'a') as f:
         f.write('[%s] /recommend user_id=%s n_recs=%s' % (time(), str(uid), str(n_rec)))
     
     if not uid:
@@ -61,34 +61,43 @@ def hello():
         return jsonify({'error': 'given user_id is not numeric', 'args': request.args})
     
     # Handle broken user_id
+    make_item = lambda idx, score: {'item_id': idx, 'site_id': config.site_id, 'score': score}
+    is_top_popular = 0
+    recs = []
     try:
         uix = mapper.get_user_ix(int(uid))
+        # Calculate recommendations
+        items = model.recommend_user(uix, n_rec, return_scores=True)
+        # to real ids
+        items = [(mapper.get_item_id(idx), score) for idx, score in items]
+        # to response format
+        recs = [make_item(idx, score) for idx, score in items]
     except KeyError:
-        return jsonify({'items': get_top_popular(n_rec), 'additional': 'top popular returned', 'args': request.args})
+        is_top_popular = 1
+        recs = [make_item(idx, 1) for idx in get_top_popular(n_rec)]
     
-    # Calculate recommendations
-    items = model.recommend_user(uix, n_rec)
-    items = list([mapper.get_item_id(int(x)) for x in items])
-    return jsonify({'items': items, 'args': request.args})
+    return jsonify({'is_top_pop': is_top_popular, 'items': recs, 'args': request.args})
 
 
 @app.route('/recalculate')
 def recalc():
     # Updates recommender model and top popular list
-    global model, mapper, top_popular
-    path = '../data/raw/dorama-recommender-users.sql'
-    table = 'dorama_recomm'
+    return jsonify{'status': 'not ok', 'additional': 'ping me to finish this code'}
     
-    # Reformat data from dump
-    with open(config.path, 'w') as f:
-        f.write(read_dump(path, table).getvalue())
+#     global model, mapper, top_popular
+#     path = config.path.replace('views.csv', 'raw/%s-recommender-users.sql' % config.name)
+# #     table = config.
     
-    loader = Loader(config.path)
-    df = loader.get_views_from_file(config.path)
-    top_popular = df.groupby(config.data.item_id_field).count()['rate'].sort_values(ascending=False).index.tolist()[:100]
+#     # Reformat data from dump
+#     with open(config.path, 'w') as f:
+#         f.write(read_dump(path, table).getvalue())
     
-    mapper, model = prepare_model(df, config)
-    return jsonify({'status': 'ok'})
+#     loader = Loader(config.path)
+#     df = loader.get_views_from_file(config.path)
+#     top_popular = df.groupby(config.data.item_id_field).count()['rate'].sort_values(ascending=False).index.tolist()[:100]
+    
+#     mapper, model = prepare_model(df, config)
+#     return jsonify({'status': 'ok'})
     
         
 

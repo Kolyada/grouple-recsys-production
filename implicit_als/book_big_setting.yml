@@ -1,10 +1,13 @@
 path: '/data/groupLe_recsys/book/views.csv'
 
 
-regularization: 0.01
-alpha: 10
+regularization: 0.02
+alpha: 80
 factors: 50
 iterations: 20
+
+site_id: 'books'
+name: 'book'
 
 data:
     user_id_field: 'user_id'

@@ -42,9 +42,12 @@ class ImplicitALS:
         self.model.fit(self.iu_mat)
         
         
-    def recommend_user(self, user, k):
+    def recommend_user(self, user, k, return_scores=False):
         recs = self.model.recommend(user, 
                                    self.ui_mat, 
                                    N=k, 
                                    filter_already_liked_items=True)
-        return [rec[0] for rec in recs]
+        if not return_scores:
+            return [rec[0] for rec in recs]
+        else:
+            return recs

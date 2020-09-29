@@ -6,6 +6,9 @@ alpha: 100
 factors: 50
 iterations: 10
 
+site_id: 'dorama'
+name: 'dorama'
+
 data:
     user_id_field: 'user_id'
     item_id_field: 'item_id'
