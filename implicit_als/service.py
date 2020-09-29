@@ -53,7 +53,7 @@ def hello():
     n_rec = int(request.args.get('n_recs', 5))
     
     with open(config.name+'-usage.log', 'a') as f:
-        f.write('[%s] /recommend user_id=%s n_recs=%s' % (time(), str(uid), str(n_rec)))
+        f.write('[%s] /recommend user_id=%s n_recs=%s\n' % (time(), str(uid), str(n_rec)))
     
     if not uid:
         return jsonify({'error': 'no user_id provided', 'args': request.args})
@@ -61,7 +61,7 @@ def hello():
         return jsonify({'error': 'given user_id is not numeric', 'args': request.args})
     
     # Handle broken user_id
-    make_item = lambda idx, score: {'item_id': idx, 'site_id': config.site_id, 'score': float(score)}
+    make_item = lambda idx, score: {'itemId': idx, 'siteId': config.site_id, 'score': float(score)}
     is_top_popular = 0
     recs = []
     try:
@@ -76,7 +76,7 @@ def hello():
         is_top_popular = 1
         recs = [make_item(idx, 1) for idx in get_top_popular(n_rec)]
     
-    return jsonify({'is_top_pop': is_top_popular, 'items': recs, 'args': request.args})
+    return jsonify({'isTopPop': is_top_popular, 'items': recs, 'args': request.args})
 
 
 @app.route('/recalculate')
