@@ -61,7 +61,7 @@ def hello():
         return jsonify({'error': 'given user_id is not numeric', 'args': request.args})
     
     # Handle broken user_id
-    make_item = lambda idx, score: {'item_id': idx, 'site_id': config.site_id, 'score': score}
+    make_item = lambda idx, score: {'item_id': idx, 'site_id': config.site_id, 'score': float(score)}
     is_top_popular = 0
     recs = []
     try:
@@ -82,7 +82,7 @@ def hello():
 @app.route('/recalculate')
 def recalc():
     # Updates recommender model and top popular list
-    return jsonify{'status': 'not ok', 'additional': 'ping me to finish this code'}
+    return jsonify({'status': 'not ok', 'additional': 'ping me to finish this code'})
     
 #     global model, mapper, top_popular
 #     path = config.path.replace('views.csv', 'raw/%s-recommender-users.sql' % config.name)
