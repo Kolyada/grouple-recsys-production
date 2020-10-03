@@ -1,4 +1,6 @@
 import sys
+import os
+from datetime import datetime
 import pandas as pd
 from tqdm import tqdm
 from flask import Flask, request, jsonify, render_template
@@ -15,14 +17,13 @@ from read_dump import read_dump
 def prepare_model(train_df, config):
     preprocessor = Preprocessor()
 
-    train_df = preprocessor.filter_zeros(train_df)
+#     train_df = preprocessor.filter_zeros(train_df)
     train_df = preprocessor.filter_lazy_users(train_df, 0)
     preprocessor.build_mappers(train_df)
 
     train_df.user_id  = train_df.user_id.apply(preprocessor.get_user_ix)
     train_df.item_id = train_df.item_id.apply(preprocessor.get_item_ix)
     print('Train df contains', train_df.shape[0], 'items')
-
 
     model = ImplicitALS(train_df, config)
     model.fit()
@@ -32,6 +33,12 @@ def prepare_model(train_df, config):
 
 def get_top_popular(n):
     return top_popular[:n]
+def calc_top_popular(df):
+    N = 70
+    populars = df.groupby('item_id').count()['rate'].sort_values(ascending=False)
+    populars = populars.index.tolist()
+    return populars[:N]
+    
 
 from datetime import datetime as dt
 time = lambda: '[%s]' % dt.now().strftime('%H:%M:%S')
@@ -82,36 +89,34 @@ def hello():
 @app.route('/recalculate')
 def recalc():
     # Updates recommender model and top popular list
-    return jsonify({'status': 'not ok', 'additional': 'ping me to finish this code'})
     
-#     global model, mapper, top_popular
-#     path = config.path.replace('views.csv', 'raw/%s-recommender-users.sql' % config.name)
-# #     table = config.
-    
-#     # Reformat data from dump
-#     with open(config.path, 'w') as f:
-#         f.write(read_dump(path, table).getvalue())
-    
-#     loader = Loader(config.path)
-#     df = loader.get_views_from_file(config.path)
-#     top_popular = df.groupby(config.data.item_id_field).count()['rate'].sort_values(ascending=False).index.tolist()[:100]
-    
-#     mapper, model = prepare_model(df, config)
-#     return jsonify({'status': 'ok'})
+    global loader, model, mapper, top_popular
+
+    # if current views table is too old, recalc dump and fetch fresh data from it
+    curr_timestamp = int(datetime.now().timestamp())
+    last_modified = int(os.path.getmtime(config.path))
+    if curr_timestamp - last_modified < 3600: # older then 1 hour
+        os.system("mysqldump -uroot -proot recom all_recomm > /data/groupLe_recsys/all/raw/all-recommender-users.sql")
+        os.system("python3 ../unpack_data.py")
+        
+    # recalc top populars and model
+    df = loader.get_views()
+    top_popular = calc_top_popular(df)
+
+    mapper, model = prepare_model(df, config)
+    return jsonify({'status': 'ok', 'lastDataUpdateTimestamp': last_modified})
     
         
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 2:
         raise AttributeError('Use config name to define model config and port to define service port')
     cfg_path = sys.argv[1] #'books_big_setting.yml'
-    port = sys.argv[2]
-    
-    
     config = Hparam(cfg_path)
+    
     loader = Loader(config.path)
-    df = loader.get_views_from_file(config.path)
-    top_popular = df.groupby(config.data.item_id_field).count()['rate'].sort_values(ascending=False).index.tolist()[:100]
+    df = loader.get_views()
+    top_popular = calc_top_popular(df)
     
     mapper, model = prepare_model(df, config)
-    app.run(host='0.0.0.0', port=int(port))
+    app.run(host='0.0.0.0', port=int(config.port))

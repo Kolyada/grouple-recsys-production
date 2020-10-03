@@ -30,8 +30,8 @@ class ImplicitALS:
     
     def _calc_confidence_preference(self, df, alpha):
         # convert to confidence and preference according to paper
-        calc_preference = lambda v: 1 if v>0 else -10
-        df['metric']= df.rate.apply(calc_preference)
+        calc_preference = lambda v: 1 if v>6 else 0
+        df['metric'] = df.rate.apply(calc_preference)
         df.metric = df.metric * alpha * df.rate
         df.rate = df.metric
         df = df.drop('metric', axis=1)

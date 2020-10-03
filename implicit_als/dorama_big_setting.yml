@@ -1,18 +1,15 @@
 path: '/data/groupLe_recsys/dorama/views.csv'
-
+port: 5000
 
 regularization: 0.03
-alpha: 100
-factors: 50
-iterations: 10
+alpha: 40
+factors: 40
+iterations: 4
 
-site_id: 'dorama'
+site_id: 5
 name: 'dorama'
-
-data:
-    user_id_field: 'user_id'
-    item_id_field: 'item_id'
-    rate_field: 'rate'
     
+min_user_views: 20
 testing:
-    test_samples: 10
+    samples: 15
+    users_n: 700

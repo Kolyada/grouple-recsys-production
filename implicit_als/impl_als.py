@@ -3,6 +3,7 @@ from tqdm import tqdm
 from yamlparams.utils import Hparam
 import sys
 
+
 from metrics import mean_average_presision_k, hitrate_k, novelty, coverage
 from dataloader import Loader
 from preprocessor import Preprocessor
@@ -14,42 +15,41 @@ if len(sys.argv) < 2:
 cfg_path = sys.argv[1] #'books_big_setting.yml'
 print(cfg_path,' cfg')
 config = Hparam(cfg_path)
-loader = Loader(config.path.replace('views.csv', ''))
+loader = Loader(config.path)
 preprocessor = Preprocessor()
 
 
-train_df = loader.get_train_views()
-test_df = loader.get_test_views()
+print('Reading data')
+df = loader.get_views()
+# train_df = preprocessor.filter_zeros(train_df)
+df = preprocessor.filter_lazy_users(df, 0)
+train_df, test_df = loader.split_train_test(df, config.min_user_views, config.testing.samples)
 
-train_df = preprocessor.filter_zeros(train_df)
-train_df = preprocessor.filter_lazy_users(train_df, 0)
 train_df, test_df = preprocessor.filter_not_in_test_items(train_df, test_df)
 preprocessor.build_mappers(train_df.append(test_df))
 
 train_df.user_id  = train_df.user_id.apply(preprocessor.get_user_ix)
-train_df.item_id = train_df.item_id.apply(preprocessor.get_item_ix)
+train_df.item_id  = train_df.item_id.apply(preprocessor.get_item_ix)
 test_df.user_id   = test_df.user_id.apply(preprocessor.get_user_ix)
-test_df.item_id  = test_df.item_id.apply(preprocessor.get_item_ix)
+test_df.item_id   = test_df.item_id.apply(preprocessor.get_item_ix)
 print('Train df contains', train_df.shape[0], 'items')
 
 
-
-# config = Hparam('./experiment.yml')
 model = ImplicitALS(train_df, config)
 model.fit()
-
 
 
 ## calc recommendations
 rec_items = []
 uixs = []
-for uix in tqdm(range(0, train_df.user_id.max()+1,1)):
+stepsize = int(train_df.user_id.max()/config.testing.users_n)
+for uix in tqdm(range(0, train_df.user_id.max()+1, stepsize)):
     uixs.append(uix)
-    rec_items.append(model.recommend_user(uix, config.testing.test_samples))
+    rec_items.append(model.recommend_user(uix, config.testing.samples))
 gt = test_df[test_df.user_id.isin(uixs)].groupby('user_id')['item_id'].apply(list).tolist()
 
 ## calc metrics
-for k in [config.testing.test_samples//2, config.testing.test_samples]:
+for k in [config.testing.samples//2, config.testing.samples]:
     print('\nMAP@%d' % k,    round(mean_average_presision_k(rec_items, gt, k=k), 5))
     print('Hitrate@%d' % k,  round(hitrate_k(rec_items, gt, k=k), 4))
     print('Novelty@%d' % k,  round(novelty(rec_items, k), 2))
