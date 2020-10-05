@@ -2,9 +2,9 @@ path: '/data/groupLe_recsys/dorama/views.csv'
 port: 5000
 
 regularization: 0.03
-alpha: 40
-factors: 40
-iterations: 4
+alpha: 40 
+factors: 10
+iterations: 25
 
 site_id: 5
 name: 'dorama'

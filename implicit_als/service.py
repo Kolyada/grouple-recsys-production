@@ -90,7 +90,7 @@ def hello():
 def recalc():
     # Updates recommender model and top popular list
     
-    global loader, model, mapper, top_popular
+    global loader, model, mapper, top_popular, config
 
     # if current views table is too old, recalc dump and fetch fresh data from it
     curr_timestamp = int(datetime.now().timestamp())
@@ -103,6 +103,8 @@ def recalc():
     df = loader.get_views()
     top_popular = calc_top_popular(df)
 
+    # reread config
+    config = Hparam(cfg_path)
     mapper, model = prepare_model(df, config)
     return jsonify({'status': 'ok', 'lastDataUpdateTimestamp': last_modified})
     
