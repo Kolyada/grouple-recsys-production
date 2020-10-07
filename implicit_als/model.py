@@ -43,10 +43,29 @@ class ImplicitALS:
         
         
     def recommend_user(self, user, k, return_scores=False):
-        recs = self.model.recommend(user, 
-                                   self.ui_mat, 
-                                   N=k, 
-                                   filter_already_liked_items=True)
+        user_items = set(self.ui_mat.getrow(user).indices)
+        def delete_bookmarks(recs):
+            # Since filter_already_liked doesnt work, filter by hand
+            for i, rec in enumerate(recs):
+                if rec[0] in user_items:
+                    recs[i] = None
+            recs = list(filter(lambda r: r is not None, recs))
+            return recs
+        
+        # filter liked until len(recs) != given k
+        base_k = k
+        k = int(min(1.5*k, k+0.1*len(user_items)))
+        recs = self.model.recommend(user, self.ui_mat, N=k)
+        recs = delete_bookmarks(recs)
+                
+        while len(recs) < base_k:
+            k *= 2
+            with open('./log.log', 'a') as f:
+                f.write('recommending u={} k={}\n'.format(user, k))
+            recs = self.model.recommend(user, self.ui_mat, N=k)
+            recs = delete_bookmarks(recs)
+                                    
+        # return with or without scores
         if not return_scores:
             return [rec[0] for rec in recs]
         else:

@@ -42,6 +42,9 @@ class Preprocessor:
         lazy_users = d[d <= min_user_rates].index.to_list()
         return views[~views.user_id.isin(lazy_users)]
     
+    def filter_smalldata_users(self, views, min_user_rates):
+        raise NotImplemented
+    
     def filter_not_in_test_items(self, views, test_views):
         test_items = test_views.item_id.drop_duplicates()
         views = views[views.item_id.isin(test_items)]        
