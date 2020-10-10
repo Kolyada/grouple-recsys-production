@@ -91,7 +91,7 @@ def hello():
 def recalc():
     # Updates recommender model and top popular list
     
-    global loader, model, mapper, top_popular, config
+    global loader, model, mapper, top_popular, config, df
 
     # if current views table is too old, recalc dump and fetch fresh data from it
     curr_timestamp = int(datetime.now().timestamp())
