@@ -95,8 +95,8 @@ def recalc():
 
     # if current views table is too old, recalc dump and fetch fresh data from it
     curr_timestamp = int(datetime.now().timestamp())
-    last_modified = int(os.path.getmtime(config.path))
-    if curr_timestamp - last_modified < 3600: # older then 1 hour
+    last_modified = int(os.stat(config.path).st_mtime)
+    if curr_timestamp - last_modified > 3600: # older then 1 hour
         os.system("mysqldump -uroot -proot recom all_recomm > /data/groupLe_recsys/all/raw/all-recommender-users.sql")
         os.system("python3 ../unpack_data.py")
         
