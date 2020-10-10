@@ -5,6 +5,7 @@ import pandas as pd
 from tqdm import tqdm
 from flask import Flask, request, jsonify, render_template
 from yamlparams.utils import Hparam
+import gc
 
 from metrics import mean_average_presision_k, hitrate_k, novelty, coverage
 from dataloader import Loader
@@ -99,6 +100,10 @@ def recalc():
         os.system("mysqldump -uroot -proot recom all_recomm > /data/groupLe_recsys/all/raw/all-recommender-users.sql")
         os.system("python3 ../unpack_data.py")
         
+    # delete huge data to avoid memory overhead    
+    del df
+    gc.collect()
+    
     # recalc top populars and model
     df = loader.get_views()
     top_popular = calc_top_popular(df)
