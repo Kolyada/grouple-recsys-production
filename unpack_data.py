@@ -35,7 +35,7 @@ df = df[~df.rate.isna()]
 
 site_ids = {'dorama': 5,
             'manga':  1,
-            'mint': 2
+            'mint': 2,
             'book':   6}
 for site_name, site_id in site_ids.items():
     print('\nSeparating %s data' % site_name)

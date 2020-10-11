@@ -4,7 +4,7 @@ port: 5000
 regularization: 0.03
 alpha: 40 
 factors: 10
-iterations: 25
+iterations: 5
 
 site_id: 5
 name: 'dorama'
