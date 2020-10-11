@@ -60,7 +60,7 @@ class ImplicitALS:
                 
         while len(recs) < base_k:
             k *= 2
-            with open('./log.log', 'a') as f:
+            with open('./n_recs.log', 'a') as f:
                 f.write('recommending u={} k={}\n'.format(user, k))
             recs = self.model.recommend(user, self.ui_mat, N=k)
             recs = delete_bookmarks(recs)
