@@ -34,14 +34,12 @@ df = df[~df.rate.isna()]
 
 
 site_ids = {'dorama': 5,
-            'manga':  (1, 2),
+            'manga':  1,
+            'mint': 2
             'book':   6}
 for site_name, site_id in site_ids.items():
     print('\nSeparating %s data' % site_name)
-    if isinstance(site_id, int):
-        sub_df = df[df.site_id == site_id]
-    else:
-        sub_df = df[df.site_id.isin(site_id)]
+    sub_df = df[df.site_id == site_id]
     print('Saving to directory')
     sub_df.to_csv(csv_path_ptn.format(name=site_name), 
                   index=False, 

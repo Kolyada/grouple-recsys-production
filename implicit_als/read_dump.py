@@ -3,6 +3,16 @@ from tqdm import tqdm
 
 BUFFER_SIZE = 1500
 
+
+
+from datetime import datetime as dt
+def to_timestamp(timestr):
+    dtobj = dt.strptime(timestr, '%Y-%m-%d %H:%M:%S')
+    timestamp = int(dtobj.timestamp())
+    return timestamp
+
+
+
 def read_dump(dump_filename, target_table, csv_path):
     fast_forward = True
     buffer = []
@@ -21,7 +31,7 @@ def read_dump(dump_filename, target_table, csv_path):
                 for i, obj in enumerate(data):
                     # (3,10,21719,2,'2012-06-14 15:17:10')
                     try:
-                        row = obj[1:-1]#.split(',')
+                        row = obj[1:-1] # drop brackets
                         if len(row.split(',')) != 5 and len(row.split(',')) != 6:
                             continue
                         
