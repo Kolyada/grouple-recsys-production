@@ -1,0 +1,231 @@
+swagger: "2.0"
+info:
+  description: "REST GROUPLE RECSYS API"
+  version: "1.0.0"
+  title: "GROUPLE RECSYS API"
+host: "recom.grouple.co"
+basePath: "/"
+schemes:
+- "https"
+- "http"
+
+
+tags:
+- name: "recommend"
+- name: "topPopular"
+- name: "similarItems"
+- name: "recalculate"
+- name: "rateItem"
+- name: "explorations"
+
+paths:
+  /recommend:
+    get:
+      tags:
+      - "recommend"
+      description: "Access to user views-story aware item recommendation"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "user_id"
+        in: "query"
+        description: "target user for recommendations"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "n_recs"
+        in: "query"
+        description: "Number of returned recommendation items"
+        type: "integer"
+        format: "int64"
+        default: 5
+      responses:
+        "200":
+          description: "ok"
+          schema:
+            $ref: "#/definitions/RecommendedItems"
+            
+  /topPopular:
+    get:
+      tags:
+      - "topPopular"
+      description: "Access to top popular items"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "n_recs"
+        in: "query"
+        description: "Number of returned recommendation items"
+        type: "integer"
+        format: "int64"
+        default: 20
+      responses:
+        "200":
+          description: "ok"
+          schema:
+            $ref: "#/definitions/RecommendedItems"
+  
+  /similarItems:
+    get:
+      tags:
+      - "similarItems"
+      description: "Access to items similar to given"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "item_id"
+        in: "query"
+        description: "target item for recommendations"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "n_recs"
+        in: "query"
+        description: "Number of returned recommendation items"
+        type: "integer"
+        format: "int64"
+        default: 10
+      - name: "user_id"
+        in: "query"
+        description: "target user for recommendations. If provided, already seen similar items will be filtered"
+        type: "integer"
+        format: "int64"
+      responses:
+        "200":
+          description: "ok"
+          schema:
+            $ref: "#/definitions/RecommendedItems"
+  
+  /recalculate:
+    get:
+      tags:
+      - "recalculate"
+      description: "Update model's data and predictions"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "ok"
+          schema:
+            type: "object"
+            properties:
+              lastDataUpdateTimestamp:
+                type: "integer"
+                format: "int64"
+              status:
+                type: "string"
+                default: "ok"
+  
+  /rateItem:
+    post:
+      tags:
+      - "rateItem"
+      description: "Notify recsystem about user's rate action"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "user_id"
+        in: "query"
+        description: "User who made an action"
+        type: "integer"
+        format: "int64"
+        required: true
+      - name: "item_id"
+        in: "query"
+        description: "Item on which action fired"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "rate"
+        in: "query"
+        description: "User rate for given item"
+        type: "integer"
+        format: "int64"
+        required: true
+      responses:
+        "200":
+          description: "ok"
+          schema:
+            type: "object"
+            properties:
+              status:
+                type: "string"
+                default: "ok"
+            
+  /explorations:
+    get:
+      tags:
+      - "explorations"
+      description: "Access to cold-start item recommendations"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "user_id"
+        in: "query"
+        description: "target user for recommendations. If provided, already seen similar items will be filtered"
+        type: "integer"
+        format: "int64"
+      responses:
+        "200":
+          description: "ok"
+          schema:
+            $ref: "#/definitions/ExplorationsItems"
+
+
+
+
+definitions:
+  RecommendedItems:
+    type: "object"
+    properties:
+      args:
+        description: "Request arguments. Used for debug. Remind me to delete it"
+        type: "object"
+      isTopPop:
+        type: "integer"
+        description: "Bool flag marks that returned items are top popular items. It happens when user is unknown or his view story is too short"
+      items:
+        type: "array"
+        items: 
+          $ref: "#/definitions/Item"
+  
+  Item:
+    type: "object"
+    properties:
+      item_id:
+        type: "integer"
+      score:
+        type: "number"
+        format: "double"
+        description: "Measure of relevance. For context-unaware recs (such as top popular) value replaced with 1.0"
+      siteId:
+        type: "integer"
+      
+  ExplorationsItems:
+    type: "object"
+    description: "Map of content metacategory number to array of items ids"
+    properties:
+      0:
+        $ref: "#/definitions/Items"
+      1:
+        $ref: "#/definitions/Items"
+      etc:
+        $ref: "#/definitions/Items"
+        
+  Items:
+    type: "array"
+    description: "items ids"
+    items:
+      type: "integer"

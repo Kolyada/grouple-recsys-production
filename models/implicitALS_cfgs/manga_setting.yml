@@ -1,4 +1,4 @@
-path: '/data/groupLe_recsys/manga/views.csv'
+path: '/data/groupLe_recsys/processed/manga/views.csv'
 port: 5002
 
 regularization: 0.03

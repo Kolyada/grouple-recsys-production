@@ -1,4 +1,5 @@
-path: '/data/groupLe_recsys/dorama/views.csv'
+path: '/data/groupLe_recsys/processed/dorama/views.csv'
+explorations_path: '/data/groupLe_recsys/processed/dorama/explorational_recs.json'
 port: 5000
 
 regularization: 0.03

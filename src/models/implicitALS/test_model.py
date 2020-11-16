@@ -3,43 +3,55 @@ from tqdm import tqdm
 from yamlparams.utils import Hparam
 import sys
 
-
 from metrics import mean_average_presision_k, hitrate_k, novelty, coverage
 from dataloader import Loader
 from preprocessor import Preprocessor
 from model import ImplicitALS
 
-
+# Read config
 if len(sys.argv) < 2:
     raise AttributeError('Use config name to define model config')
 cfg_path = sys.argv[1] #'books_big_setting.yml'
-print(cfg_path,' cfg')
+print('Using config ' + cfg_path)
 config = Hparam(cfg_path)
+
 loader = Loader(config.path)
 preprocessor = Preprocessor()
 
 
 print('Reading data')
 df = loader.get_views()
-# train_df = preprocessor.filter_zeros(train_df)
+
+print('Preprocessing')
+
 df = preprocessor.filter_lazy_users(df, 0)
 train_df, test_df = loader.split_train_test(df, config.min_user_views, config.testing.samples)
 
 train_df, test_df = preprocessor.filter_not_in_test_items(train_df, test_df)
-preprocessor.build_mappers(train_df.append(test_df))
+# copy for filtering already viewd items from recommendations later
+orig_train = train_df.copy()
 
-train_df.user_id  = train_df.user_id.apply(preprocessor.get_user_ix)
-train_df.item_id  = train_df.item_id.apply(preprocessor.get_item_ix)
-test_df.user_id   = test_df.user_id.apply(preprocessor.get_user_ix)
-test_df.item_id   = test_df.item_id.apply(preprocessor.get_item_ix)
+# make transforms and filters
+train_df = preprocessor.filter_zeros(train_df)
+train_df = preprocessor.cut_last_k_views(train_df, config.cut_last_k_views)
+
+preprocessor.build_mappers(train_df.append(test_df))
+train_df = preprocessor.map_ids(train_df)
+test_df  = preprocessor.map_ids(test_df)
+orig_train = preprocessor.map_ids(orig_train)
+
+
+
+
+
 print('Train df contains', train_df.shape[0], 'items')
 
 
-model = ImplicitALS(train_df, config)
+model = ImplicitALS(train_df, config, orig_train)
 model.fit()
 
 
-## calc recommendations
+print('Calculating recommendations')
 rec_items = []
 uixs = []
 stepsize = int(train_df.user_id.max()/config.testing.users_n)

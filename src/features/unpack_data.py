@@ -3,24 +3,24 @@
 # unpacks sql dump to tables for every service (separately for dorama, manga and books)
 # Data is unprocessed - only NULLs deleted
 
-from implicit_als.read_dump import read_dump
+from read_dump import read_dump
 import pandas as pd
-import matplotlib.pyplot as plt
 
 
 # # Convert data
 # full sql dump -> csv. Next load the data to the table
-path_ptn = '/data/groupLe_recsys/{name}/raw/{name}-recommender-users.sql'
-csv_path_ptn = '/data/groupLe_recsys/{name}/views.csv'
+path_ptn = '/data/groupLe_recsys/raw/{name}-recommender-users.sql'
+tmp_csv_ptn = '/data/groupLe_recsys/interim/{name}.csv'
+csv_path_ptn = '/data/groupLe_recsys/processed/{name}/views.csv'
 table_ptn = '{name}_recomm'
 
 print('Reading sql dump')
 read_dump(path_ptn.format(name='all'), 
           table_ptn.format(name='all'), 
-          csv_path_ptn.format(name='all'))
+          tmp_csv_ptn.format(name='all'))
 
 
-df = pd.read_csv(csv_path_ptn.format(name='all'), 
+df = pd.read_csv(tmp_csv_ptn.format(name='all'), 
                  header=None, 
                  na_values='NULL')
 df.columns = 'item_id site_id rate user_id status'.split()

@@ -1,4 +1,5 @@
-path: '/data/groupLe_recsys/mint/views.csv'
+path: '/data/groupLe_recsys/processed/mint/views.csv'
+explorations_path: '/data/groupLe_recsys/processed/mint/explorational_recs.json'
 port: 5003
 
 regularization: 0.03

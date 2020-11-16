@@ -29,15 +29,20 @@ def read_dump(dump_filename, target_table, csv_path):
             
                 data = re.findall('\([^\)]*\)', line)
                 for i, obj in enumerate(data):
-                    # (3,10,21719,2,'2012-06-14 15:17:10')
+                    # id, siteId, site_id, rate, user_id, status, date
+                    # (2581,3,3,1,15911,6,'2012-06-12 23:40:29')
                     try:
                         row = obj[1:-1] # drop brackets
-                        if len(row.split(',')) != 5 and len(row.split(',')) != 6:
+                        if len(row.split(',')) != 6 and len(row.split(',')) != 7:
                             continue
-                        
+
                         # drop date_created
-                        row = ','.join(row.split(',')[:-1])
+                        row = row.split(',')
+                        drop_ixs = (1, 6)
+                        row = [row[i] for i in range(len(row)) if i not in drop_ixs]
+                        row = ','.join(row)
                         buffer.append(row)
+
                         if len(buffer) > BUFFER_SIZE:
                             fout.write('\n'.join(buffer) + '\n') # write out
                             buffer = []
