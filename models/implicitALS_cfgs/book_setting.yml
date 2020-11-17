@@ -1,0 +1,17 @@
+path: '/data/groupLe_recsys/processed/book/views.csv'
+explorations_path: '/data/groupLe_recsys/processed/book/explorational_recs.json'
+port: 5001
+
+regularization: 0.03
+alpha: 40
+factors: 7
+iterations: 20
+
+site_id: 6
+name: 'book'
+
+min_user_views: 4
+cut_last_k_views: 40
+testing:
+    samples: 2
+    users_n: 500

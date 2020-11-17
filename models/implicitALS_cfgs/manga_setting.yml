@@ -1,4 +1,4 @@
-path: '/data/groupLe_recsys/manga/views.csv'
+path: '/data/groupLe_recsys/processed/manga/views.csv'
 port: 5002
 
 regularization: 0.03
@@ -10,6 +10,7 @@ site_id: 1
 name: 'manga'
 
 min_user_views: 10
+cut_last_k_views: 200
 testing:
     samples: 25
     users_n: 1000

@@ -1,4 +1,5 @@
-path: '/data/groupLe_recsys/mint/views.csv'
+path: '/data/groupLe_recsys/processed/mint/views.csv'
+explorations_path: '/data/groupLe_recsys/processed/mint/explorational_recs.json'
 port: 5003
 
 regularization: 0.03
@@ -10,6 +11,7 @@ site_id: 2
 name: 'mint'
 
 min_user_views: 10
+cut_last_k_views: 200
 testing:
     samples: 25
     users_n: 1000
