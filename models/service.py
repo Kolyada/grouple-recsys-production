@@ -54,7 +54,7 @@ def calc_top_popular(df):
 
 
 from datetime import datetime as dt
-time = lambda: '[%s]' % dt.now().strftime('%H:%M:%S')
+time = lambda: '[%s]' % dt.now().strftime('%Y-%m-%d %H:%M:%S')
 
 
 app = Flask(__name__)
@@ -70,8 +70,8 @@ def f():
     with open('logs/'+config.name+'-usage.log', 'a') as f:
         f.write('[%s] /topPopular n_recs=%s\n' % (time(), str(n_recs)))
     
-    make_item = lambda idx, score: {'itemId': idx, 'siteId': config.site_id, 'score': float(score)}
-    items = [make_item(item, 1) for item in get_top_popular(n_recs)]
+    make_item = lambda idx, score: {'itemId': idx, 'siteId': config.site_id, 'score': score}
+    items = [make_item(item, None) for item in get_top_popular(n_recs)]
     
     return jsonify({'isTopPop': 1, 'items': items, 'args': request.args})
 
@@ -83,11 +83,18 @@ def exploration():
     # If user id provided, returns recommendations without already viewd items
     # explorations format
     # {category_name: [most_viewed_item1, ], }
+    
+    
     global mapper
     uid = request.args.get('user_id', None)
+    uid_camel_case = request.args.get('userId', None)
+    if uid_camel_case is not None:
+        uid = uid_camel_case
 
     with open('logs/'+config.name+'-usage.log', 'a') as f:
         f.write('[%s] /explorations user_id=%s\n' % (time(), str(uid)))
+    
+    make_item = lambda idx, score: {'itemId': idx, 'siteId': config.site_id, 'score': score}
     
     def local2global_ids(expl_obj):
         # maps all items of explorational recs object to global ids
@@ -96,12 +103,18 @@ def exploration():
             mapped_expl_obj[cat] = [mapper.get_item_id(idx) for idx in expl_obj[cat]]
         return mapped_expl_obj
     
+    def ids2items(expl_obj):
+        items_expl_obj = dict()
+        for cat in expl_obj.keys():
+            items_expl_obj[cat] = [make_item(idx, None) for idx in expl_obj[cat]]
+        return items_expl_obj
+    
     if uid is None or not all(map(str.isdigit, str(uid))): # bad or null user_id
-        return jsonify(local2global_ids(explorations_categies))
+        return jsonify(ids2items(local2global_ids(explorations_categies)))
     
     uix = mapper.get_user_ix(int(uid))
     if uix == -1: # unknown user
-        return jsonify(local2global_ids(explorations_categies))
+        return jsonify(ids2items(local2global_ids(explorations_categies)))
     else: # known user
         viewed_items = set(model.orig_df[model.orig_df.user_id == uix]['item_id'].tolist())
         # delete viewed items and empty categories from categories lists
@@ -111,7 +124,7 @@ def exploration():
             filtred_items = [idx for idx in explorations_categies[cat] if idx not in viewed_items]
             if len(filtred_items):
                 filtred_explorations[cat] = filtred_items
-        return jsonify(local2global_ids(filtred_explorations))
+        return jsonify(ids2items(local2global_ids(filtred_explorations)))
         
         
         
@@ -120,7 +133,14 @@ def rate_item():
     # saves information about user rate action
     # saves locally and writes out once per 30 minutes
     uid = request.args.get('user_id', None)
+    uid_camel_case = request.args.get('userId', None)
+    if uid_camel_case is not None:
+        uid = uid_camel_case
     iid = request.args.get('item_id', None)
+    iid_camel_case = request.args.get('itemId', None)
+    if iid_camel_case is not None:
+        iid = iid_camel_case
+    positive = request.args.get('positive', None)
     rate = request.args.get('rate', None)
     
     is_num = lambda s: all(map(str.isdigit, str(s)))
@@ -130,7 +150,14 @@ def rate_item():
     uid, iid = list(map(int, (uid, iid)))
     uix = mapper.get_user_ix(uid)
     iix = mapper.get_item_ix(iid)
-    rate = float(rate)
+    # rate is binary, system needs 0..10
+    if positive is not None:
+        rate = positive * 10
+    elif rate is not None:
+        rate = float(rate) * 10
+    else:
+        return jsonify({'error': 'rate or positive args should be provided'})
+        
     if iix == -1:
         return jsonify({'error': 'unknown item id', 'args': request.args})
     
@@ -156,7 +183,14 @@ def hello():
     
     # Process request arguments
     uid = request.args.get('user_id', None)
+    uid_camel = request.args.get('userId', None)
+    if uid_camel is not None:
+        uid = uid_camel
+    
     n_rec = int(request.args.get('n_recs', 5))
+    n_rec_camel = int(request.args.get('nRecs', 5))
+    if n_rec_camel != 5:
+        n_rec = n_rec_camel    
     
     with open('logs/'+config.name+'-usage.log', 'a') as f:
         f.write('[%s] /recommend user_id=%s n_recs=%s\n' % (time(), str(uid), str(n_rec)))
@@ -182,7 +216,7 @@ def hello():
         recs = [make_item(idx, score) for idx, score in items]
     except KeyError:
         is_top_popular = 1
-        recs = [make_item(idx, 1) for idx in get_top_popular(n_rec)]
+        recs = [make_item(idx, None) for idx in get_top_popular(n_rec)]
     
     return jsonify({'isTopPop': is_top_popular, 'items': recs, 'args': request.args})
 
@@ -191,7 +225,14 @@ def hello():
 @app.route('/similarItems', methods=['GET'])
 def similar_items():
     iid = request.args.get('item_id', None)
+    iid_camel_case = request.args.get('itemId', None)
+    if iid_camel_case is not None:
+        iid = iid_camel_case
+    
     n_recs = int(request.args.get('n_recs', 10))
+    n_recs_camel_case = int(request.args.get('nRecs', 10))
+    if n_recs_camel_case != 10:
+        n_recs = n_recs_camel_case
     
     with open('logs/'+config.name+'-usage.log', 'a') as f:
         f.write('[%s] /similarItems item_id=%s n_recs=%s\n' % (time(), str(iid), str(n_recs)))
@@ -204,6 +245,9 @@ def similar_items():
     # Similar items may be anonimized or filtred by user's views
     # If user id provided, return similar items that user havent seen
     uid = request.args.get('user_id', -1)
+    uid_camel_case = request.args.get('user_id', -1)
+    if uid_camel_case != -1:
+        uid = uid_camel_case
     uix = mapper.get_user_ix(int(uid))
     if uix != -1 and uix < model.max_uix: # if model knows this user
         recs = model.similar_items_for_user(iix, uix, n_recs, return_scores=True)
@@ -226,7 +270,7 @@ def recalc():
     # if current views table is too old, recalc dump and fetch fresh data from it
     curr_timestamp = int(datetime.now().timestamp())
     last_modified = int(os.stat(config.path).st_mtime)
-    if curr_timestamp - last_modified > 3600: # older then 1 hour
+    if abs(curr_timestamp - last_modified) > 3600: # older then 1 hour
         os.system("mysqldump -uroot -proot recom all_recomm > /data/groupLe_recsys/raw/all-recommender-users.sql")
         os.system("python3 ../src/features/unpack_data.py")
         
