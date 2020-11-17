@@ -23,7 +23,7 @@ paths:
     get:
       tags:
       - "recommend"
-      description: "Access to user views-story aware item recommendation"
+      description: "Access to user views-story aware item recommendation. If user is unknown to system, top popular recommendations will be returned (Consists of UnscoredItems)"
       consumes:
       - "application/json"
       produces:
@@ -35,9 +35,21 @@ paths:
         required: true
         type: "integer"
         format: "int64"
+      - name: "userId"
+        in: "query"
+        description: "target user for recommendations. Please, use camelCase notation. In latest versions snake_case will be removed"
+        required: false
+        type: "integer"
+        format: "int64"
       - name: "n_recs"
         in: "query"
         description: "Number of returned recommendation items"
+        type: "integer"
+        format: "int64"
+        default: 5
+      - name: "nRecs"
+        in: "query"
+        description: "Number of returned recommendation items. Please, use camelCase notation. In latest versions snake_case will be removed"
         type: "integer"
         format: "int64"
         default: 5
@@ -45,7 +57,7 @@ paths:
         "200":
           description: "ok"
           schema:
-            $ref: "#/definitions/RecommendedItems"
+            $ref: "#/definitions/ScoredRecommendedItems"
             
   /topPopular:
     get:
@@ -63,11 +75,17 @@ paths:
         type: "integer"
         format: "int64"
         default: 20
+      - name: "nRecs"
+        in: "query"
+        description: "Number of returned recommendation items. Please, use camelCase notation. In latest versions snake_case will be removed"
+        type: "integer"
+        format: "int64"
+        default: 20
       responses:
         "200":
           description: "ok"
           schema:
-            $ref: "#/definitions/RecommendedItems"
+            $ref: "#/definitions/UnscoredRecommendedItems"
   
   /similarItems:
     get:
@@ -85,9 +103,21 @@ paths:
         required: true
         type: "integer"
         format: "int64"
+      - name: "itemId"
+        in: "query"
+        description: "target item for recommendations. Please, use camelCase notation. In latest versions snake_case will be removed"
+        required: false
+        type: "integer"
+        format: "int64"
       - name: "n_recs"
         in: "query"
         description: "Number of returned recommendation items"
+        type: "integer"
+        format: "int64"
+        default: 10
+      - name: "nRecs"
+        in: "query"
+        description: "Number of returned recommendation items. Please, use camelCase notation. In latest versions snake_case will be removed"
         type: "integer"
         format: "int64"
         default: 10
@@ -96,11 +126,16 @@ paths:
         description: "target user for recommendations. If provided, already seen similar items will be filtered"
         type: "integer"
         format: "int64"
+      - name: "userId"
+        in: "query"
+        description: "target user for recommendations. If provided, already seen similar items will be filtered. Please, use camelCase notation. In latest versions snake_case will be removed"
+        type: "integer"
+        format: "int64"
       responses:
         "200":
           description: "ok"
           schema:
-            $ref: "#/definitions/RecommendedItems"
+            $ref: "#/definitions/ScoredRecommendedItems"
   
   /recalculate:
     get:
@@ -140,10 +175,22 @@ paths:
         type: "integer"
         format: "int64"
         required: true
+      - name: "userId"
+        in: "query"
+        description: "User who made an action. Please, use camelCase notation. In latest versions snake_case will be removed"
+        type: "integer"
+        format: "int64"
+        required: false
       - name: "item_id"
         in: "query"
         description: "Item on which action fired"
         required: true
+        type: "integer"
+        format: "int64"
+      - name: "itemId"
+        in: "query"
+        description: "Item on which action fired. Please, use camelCase notation. In latest versions snake_case will be removed"
+        required: false
         type: "integer"
         format: "int64"
       - name: "rate"
@@ -152,6 +199,12 @@ paths:
         type: "integer"
         format: "int64"
         required: true
+      - name: "positive"
+        in: "query"
+        description: "User rate for given item. Please, use positive. Rate parameter will be removed in latest version"
+        type: "boolean"
+        format: "int64"
+        required: false
       responses:
         "200":
           description: "ok"
@@ -177,6 +230,11 @@ paths:
         description: "target user for recommendations. If provided, already seen similar items will be filtered"
         type: "integer"
         format: "int64"
+      - name: "userId"
+        in: "query"
+        description: "target user for recommendations. If provided, already seen similar items will be filtered. Please, use camelCase notation. In latest versions snake_case will be removed"
+        type: "integer"
+        format: "int64"
       responses:
         "200":
           description: "ok"
@@ -187,7 +245,7 @@ paths:
 
 
 definitions:
-  RecommendedItems:
+  ScoredRecommendedItems:
     type: "object"
     properties:
       args:
@@ -199,19 +257,48 @@ definitions:
       items:
         type: "array"
         items: 
-          $ref: "#/definitions/Item"
-  
-  Item:
+          $ref: "#/definitions/ScoredItem"
+          
+  ScoredItem:
     type: "object"
     properties:
-      item_id:
+      itemId:
         type: "integer"
       score:
         type: "number"
         format: "double"
-        description: "Measure of relevance. For context-unaware recs (such as top popular) value replaced with 1.0"
+        description: "Measure of relevance. Value belongs to (-inf; inf), but most recently happens on [0; 1.1]"
+      siteId:
+        type: "integer"        
+        
+  
+  UnscoredRecommendedItems:
+    type: "object"
+    properties:
+      args:
+        description: "Request arguments. Used for debug. Remind me to delete it"
+        type: "object"
+      isTopPop:
+        type: "integer"
+        description: "Bool flag marks that returned items are top popular items. It happens when user is unknown or his view story is too short"
+      items:
+        type: "array"
+        items: 
+          $ref: "#/definitions/UnscoredItem"
+  
+  UnscoredItem:
+    type: "object"
+    properties:
+      itemId:
+        type: "integer"
+      score:
+        type: "boolean"
+        format: "nullable"
+        default: "null"
+        description: "Score assigned with null value for methods that doesnt supply any scores (such as top popular)"
       siteId:
         type: "integer"
+      
       
   ExplorationsItems:
     type: "object"
@@ -228,4 +315,4 @@ definitions:
     type: "array"
     description: "items ids"
     items:
-      type: "integer"
+      $ref: '#/definitions/UnscoredItem'
