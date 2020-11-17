@@ -10,6 +10,7 @@ site_id: 1
 name: 'manga'
 
 min_user_views: 10
+cut_last_k_views: 200
 testing:
     samples: 25
     users_n: 1000

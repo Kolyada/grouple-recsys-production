@@ -11,6 +11,7 @@ site_id: 6
 name: 'book'
 
 min_user_views: 4
+cut_last_k_views: 40
 testing:
     samples: 2
     users_n: 500
