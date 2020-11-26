@@ -113,7 +113,7 @@ def exploration():
         return items_expl_obj
     
     def cats2list(expl_obj):
-        explorations = [v for k,v in expl_obj.items()]
+        explorations = [{'name': 'smf_%d'%i, 'items': v} for i, (k,v) in enumerate(expl_obj.items())]
         return explorations
     
     if uid is None or not all(map(str.isdigit, str(uid))): # bad or null user_id
