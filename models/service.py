@@ -153,7 +153,7 @@ def rate_item():
     iix = mapper.get_item_ix(iid)
     # rate is binary, system needs 0..10
     if positive is not None:
-        rate = positive * 10
+        rate = float(positive) * 10
     elif rate is not None:
         rate = float(rate) * 10
     else:
