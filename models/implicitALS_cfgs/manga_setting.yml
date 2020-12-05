@@ -9,6 +9,7 @@ iterations: 5
 site_id: 1
 name: 'manga'
 
+recalculate_user_every_n: 10
 min_user_views: 10
 cut_last_k_views: 200
 testing:

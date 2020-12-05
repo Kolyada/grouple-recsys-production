@@ -10,6 +10,7 @@ iterations: 20
 site_id: 6
 name: 'book'
 
+recalculate_user_every_n: 2
 min_user_views: 4
 cut_last_k_views: 40
 testing:

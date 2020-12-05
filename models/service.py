@@ -145,7 +145,7 @@ def rate_item():
     rate = request.args.get('rate', None)
     
     is_num = lambda s: all(map(str.isdigit, str(s)))
-    if not all(map(is_num, (uid,iid,rate))):
+    if not all(map(is_num, (uid,iid))) or all(map(lambda v: v is None, (positive, rate))):
         return jsonify({'error': 'not all arguments are integers', 'args': request.args})
     
     uid, iid = list(map(int, (uid, iid)))
@@ -164,8 +164,10 @@ def rate_item():
     
     if uix == -1: # unknown user
         # add user to mapper and update his data
+        print('add user')
         mapper.add_user_id(uid)
         uix = mapper.get_user_ix(uid)
+        model.add_user(uid, user_views=None)
     
     view = pd.DataFrame.from_records([(iix, rate, uix)], columns='item_id rate user_id'.split())
     model.orig_df = model.orig_df.append(view, ignore_index=True)
@@ -174,12 +176,18 @@ def rate_item():
     # recalculating. During recalculation, model pulls data from original database which
     # must contains all users rate actions
     
+    # Every N user action its recommendations recalculates
+    user_views = model.orig_df[model.orig_df.user_id == uix]
+    if len(user_views) % config.recalculate_user_every_n == 0:
+        print('recalc user')
+        model.update_user_data(uix, user_views)
+    
     return jsonify({'status': 'ok'})
 
 
 
 @app.route("/recommend", methods=['GET'])
-def hello():
+def recommend():
     # Recommends n_recs items to user with id user_id. Fallbacks to top popular recommendation
     
     # Process request arguments
