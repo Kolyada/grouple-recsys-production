@@ -4,7 +4,7 @@ port: 5002
 regularization: 0.03
 alpha: 40
 factors: 13
-iterations: 5
+iterations: 25
 
 site_id: 1
 name: 'manga'
