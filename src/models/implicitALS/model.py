@@ -135,7 +135,8 @@ class ImplicitALS:
         assert len(user_views) > 0
         assert len(user_views.user_id.drop_duplicates()) == 1
 
-        user_views = user_views.drop_duplicates()
+        user_views = user_views[user_views.item_id != -1]
+        user_views = user_views.drop_duplicates(subset='item_id user_id'.split(), keep='last')
         user_views = self._calc_confidence_preference(user_views, self.config.alpha)
         iixs = user_views.item_id.tolist()
         rates = user_views.rate.tolist()
