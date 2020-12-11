@@ -1,4 +1,5 @@
 path: '/data/groupLe_recsys/processed/manga/views.csv'
+explorations_path: '/data/groupLe_recsys/processed/manga/explorational_recs.json'
 port: 5002
 
 regularization: 0.03

@@ -270,6 +270,7 @@ def recalc():
     last_modified = int(os.stat(config.path).st_mtime)
     if abs(curr_timestamp - last_modified) > 3600: # older then 1 hour
         os.system("mysqldump -uroot -proot recom all_recomm > /data/groupLe_recsys/raw/all-recommender-users.sql")
+        os.system("mysqldump -uroot -proot recom likes > /data/groupLe_recsys/raw/likes.sql")
         os.system("python3 ../src/features/unpack_data.py")
         
     # delete huge data to avoid memory overhead    
