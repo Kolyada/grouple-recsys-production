@@ -9,7 +9,8 @@ iterations: 2
 
 site_id: 5
 name: 'dorama'
-    
+   
+recalculate_user_every_n: 10
 min_user_views: 5
 cut_last_k_views: 200
 testing:

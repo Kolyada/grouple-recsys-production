@@ -13,7 +13,15 @@ def to_timestamp(timestr):
 
 
 
-def read_dump(dump_filename, target_table, csv_path):
+def read_dump(dump_filename, target_table, csv_path, required_fields, n_fields):
+    """
+    Parses .sql dump to records format. Uses small buffer when writing data to file
+    @param dump_filename: path to .sql dump file
+    @param target_table: name of table in dump file
+    @param csv_path: path to resulted .csv file
+    @param required_fields: tuple of field ixs
+    @param n_fields: filters records with other number of items
+    """
     fast_forward = True
     buffer = []
     
@@ -29,24 +37,23 @@ def read_dump(dump_filename, target_table, csv_path):
             
                 data = re.findall('\([^\)]*\)', line)
                 for i, obj in enumerate(data):
-                    # id, siteId, site_id, rate, user_id, status, date
-                    # (2581,3,3,1,15911,6,'2012-06-12 23:40:29')
+                    # id, site_id, rate, user_id, status, date
+                    # (2583,3,1,15911,6,'2012-06-12 23:40:29')
                     try:
                         row = obj[1:-1] # drop brackets
-                        if len(row.split(',')) != 6 and len(row.split(',')) != 7:
+                        if len(row.split(',')) != n_fields:
                             continue
 
                         # drop date_created
                         row = row.split(',')
-                        drop_ixs = (1, 6)
-                        row = [row[i] for i in range(len(row)) if i not in drop_ixs]
+                        row = [row[i] for i in range(len(row)) if i in required_fields]
                         row = ','.join(row)
                         buffer.append(row)
 
                         if len(buffer) > BUFFER_SIZE:
                             fout.write('\n'.join(buffer) + '\n') # write out
                             buffer = []
-                            
+
                     except Exception as e:
                         pass#raise e
                     

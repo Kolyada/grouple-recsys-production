@@ -70,10 +70,12 @@ def f():
     with open('logs/'+config.name+'-usage.log', 'a') as f:
         f.write('[%s] /topPopular n_recs=%s\n' % (time(), str(n_recs)))
     
-    make_item = lambda idx, score: {'itemId': idx, 'siteId': config.site_id, 'score': score}
+    make_item = lambda idx, score: {'itemId': idx, 'siteId': config.site_id, 'score': score,
+                                    'item_id': idx, 'site_id': config.site_id}
     items = [make_item(item, None) for item in get_top_popular(n_recs)]
     
-    return jsonify({'isTopPop': 1, 'items': items, 'args': request.args})
+    return jsonify({'isTopPop': 1, 'items': items, 'args': request.args,
+                    'is_top_pop': 1})
 
 
 
@@ -94,7 +96,8 @@ def exploration():
     with open('logs/'+config.name+'-usage.log', 'a') as f:
         f.write('[%s] /explorations user_id=%s\n' % (time(), str(uid)))
     
-    make_item = lambda idx, score: {'itemId': idx, 'siteId': config.site_id, 'score': score}
+    make_item = lambda idx, score: {'itemId': idx, 'siteId': config.site_id, 'score': score,
+                                    'item_id': idx, 'site_id': config.site_id}
     
     def local2global_ids(expl_obj):
         # maps all items of explorational recs object to global ids
@@ -109,12 +112,16 @@ def exploration():
             items_expl_obj[cat] = [make_item(idx, None) for idx in expl_obj[cat]]
         return items_expl_obj
     
+    def cats2list(expl_obj):
+        explorations = [{'name': 'smf_%d'%i, 'items': v} for i, (k,v) in enumerate(expl_obj.items())]
+        return explorations
+    
     if uid is None or not all(map(str.isdigit, str(uid))): # bad or null user_id
-        return jsonify(ids2items(local2global_ids(explorations_categies)))
+        return jsonify(cats2list(ids2items(local2global_ids(explorations_categies))))
     
     uix = mapper.get_user_ix(int(uid))
     if uix == -1: # unknown user
-        return jsonify(ids2items(local2global_ids(explorations_categies)))
+        return jsonify(cats2list(ids2items(local2global_ids(explorations_categies))))
     else: # known user
         viewed_items = set(model.orig_df[model.orig_df.user_id == uix]['item_id'].tolist())
         # delete viewed items and empty categories from categories lists
@@ -124,7 +131,7 @@ def exploration():
             filtred_items = [idx for idx in explorations_categies[cat] if idx not in viewed_items]
             if len(filtred_items):
                 filtred_explorations[cat] = filtred_items
-        return jsonify(ids2items(local2global_ids(filtred_explorations)))
+        return jsonify(cats2list(ids2items(local2global_ids(filtred_explorations))))
         
         
         
@@ -133,18 +140,12 @@ def rate_item():
     # saves information about user rate action
     # saves locally and writes out once per 30 minutes
     uid = request.args.get('user_id', None)
-    uid_camel_case = request.args.get('userId', None)
-    if uid_camel_case is not None:
-        uid = uid_camel_case
     iid = request.args.get('item_id', None)
-    iid_camel_case = request.args.get('itemId', None)
-    if iid_camel_case is not None:
-        iid = iid_camel_case
     positive = request.args.get('positive', None)
     rate = request.args.get('rate', None)
     
     is_num = lambda s: all(map(str.isdigit, str(s)))
-    if not all(map(is_num, (uid,iid,rate))):
+    if not all(map(is_num, (uid,iid))) or all(map(lambda v: v is None, (positive, rate))):
         return jsonify({'error': 'not all arguments are integers', 'args': request.args})
     
     uid, iid = list(map(int, (uid, iid)))
@@ -152,7 +153,7 @@ def rate_item():
     iix = mapper.get_item_ix(iid)
     # rate is binary, system needs 0..10
     if positive is not None:
-        rate = positive * 10
+        rate = float(positive) * 10
     elif rate is not None:
         rate = float(rate) * 10
     else:
@@ -163,8 +164,10 @@ def rate_item():
     
     if uix == -1: # unknown user
         # add user to mapper and update his data
+        print('add user')
         mapper.add_user_id(uid)
         uix = mapper.get_user_ix(uid)
+        model.add_user(uid, user_views=None)
     
     view = pd.DataFrame.from_records([(iix, rate, uix)], columns='item_id rate user_id'.split())
     model.orig_df = model.orig_df.append(view, ignore_index=True)
@@ -173,24 +176,23 @@ def rate_item():
     # recalculating. During recalculation, model pulls data from original database which
     # must contains all users rate actions
     
+    # Every N user action its recommendations recalculates
+    user_views = model.orig_df[model.orig_df.user_id == uix]
+    if len(user_views) % config.recalculate_user_every_n == 0:
+        print('recalc user')
+        model.update_user_data(uix, user_views)
+    
     return jsonify({'status': 'ok'})
 
 
 
 @app.route("/recommend", methods=['GET'])
-def hello():
+def recommend():
     # Recommends n_recs items to user with id user_id. Fallbacks to top popular recommendation
     
     # Process request arguments
     uid = request.args.get('user_id', None)
-    uid_camel = request.args.get('userId', None)
-    if uid_camel is not None:
-        uid = uid_camel
-    
     n_rec = int(request.args.get('n_recs', 5))
-    n_rec_camel = int(request.args.get('nRecs', 5))
-    if n_rec_camel != 5:
-        n_rec = n_rec_camel    
     
     with open('logs/'+config.name+'-usage.log', 'a') as f:
         f.write('[%s] /recommend user_id=%s n_recs=%s\n' % (time(), str(uid), str(n_rec)))
@@ -201,7 +203,8 @@ def hello():
         return jsonify({'error': 'given user_id is not numeric', 'args': request.args})
     
     # Handle broken user_id
-    make_item = lambda idx, score: {'itemId': idx, 'siteId': config.site_id, 'score': float(score)}
+    make_item = lambda idx, score: {'itemId': idx, 'siteId': config.site_id, 'score': score,
+                                    'item_id': idx, 'site_id': config.site_id}
     is_top_popular = 0
     recs = []
     try:
@@ -213,26 +216,20 @@ def hello():
         # to real ids
         items = [(mapper.get_item_id(idx), score) for idx, score in items]
         # to response format
-        recs = [make_item(idx, score) for idx, score in items]
+        recs = [make_item(idx, float(score)) for idx, score in items]
     except KeyError:
         is_top_popular = 1
         recs = [make_item(idx, None) for idx in get_top_popular(n_rec)]
     
-    return jsonify({'isTopPop': is_top_popular, 'items': recs, 'args': request.args})
+    return jsonify({'isTopPop': is_top_popular, 'items': recs, 'args': request.args,
+                    'is_top_pop': is_top_popular})
 
 
 
 @app.route('/similarItems', methods=['GET'])
 def similar_items():
     iid = request.args.get('item_id', None)
-    iid_camel_case = request.args.get('itemId', None)
-    if iid_camel_case is not None:
-        iid = iid_camel_case
-    
     n_recs = int(request.args.get('n_recs', 10))
-    n_recs_camel_case = int(request.args.get('nRecs', 10))
-    if n_recs_camel_case != 10:
-        n_recs = n_recs_camel_case
     
     with open('logs/'+config.name+'-usage.log', 'a') as f:
         f.write('[%s] /similarItems item_id=%s n_recs=%s\n' % (time(), str(iid), str(n_recs)))
@@ -255,7 +252,8 @@ def similar_items():
         recs = model.similar_items(iix, n_recs, return_scores=True)
         
     # map to real ids
-    make_item = lambda idx, score: {'itemId': idx, 'siteId': config.site_id, 'score': float(score)}
+    make_item = lambda idx, score: {'itemId': idx, 'siteId': config.site_id, 'score': float(score),
+                                    'item_id': idx,'site_id':config.site_id}
     recs = [make_item(mapper.get_item_id(idx), score) for idx, score in recs]
     return jsonify({'items': recs, 'args': request.args})
     
@@ -271,7 +269,8 @@ def recalc():
     curr_timestamp = int(datetime.now().timestamp())
     last_modified = int(os.stat(config.path).st_mtime)
     if abs(curr_timestamp - last_modified) > 3600: # older then 1 hour
-        os.system("mysqldump -uroot -proot recom all_recomm > /data/groupLe_recsys/raw/all-recommender-users.sql")
+        os.system("mysqldump -uroot -proot recommend bookmark > /data/groupLe_recsys/raw/all-recommender-users.sql")
+        os.system("mysqldump -uroot -proot recommend likes > /data/groupLe_recsys/raw/likes.sql")
         os.system("python3 ../src/features/unpack_data.py")
         
     # delete huge data to avoid memory overhead    
