@@ -17,7 +17,7 @@ table_ptn = '{name}_recomm'
 
 print('Reading sql dump')
 read_dump(path_ptn.format(name='all'),
-          table_ptn.format(name='all'),
+          'bookmark',
           tmp_csv_ptn.format(name='all'),
           (1, 2, 3, 4, 5), 7)
 
@@ -25,9 +25,9 @@ print('Reading likes')
 read_dump('/data/groupLe_recsys/raw/likes.sql',
           'likes',
           '/data/groupLe_recsys/raw/likes.csv',
-          (0, 1, 2, 3), 5)
+          (1, 2, 3, 4), 5)
 df_likes = pd.read_csv('/data/groupLe_recsys/raw/likes.csv', header=None, na_values='NULL')
-df_likes.columns = 'item_id site_id user_id positive'.split()
+df_likes.columns = 'positive user_id site_id item_id'.split()
 df_likes['rate'] = df_likes.positive.apply(lambda p: 1 if str(p) == "_binary ''" else 0) * 10
 df_likes['status'] = None
 df_likes = df_likes.drop('positive', axis=1)
