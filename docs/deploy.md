@@ -9,7 +9,14 @@
 
 ## Run
 
+For custom service container
 ```
 ./build_docker.sh
 ./run_docker.sh {port} {config_file_name}
+```
+
+For default services
+```
+cd run_services
+./run_{service}.sh
 ```

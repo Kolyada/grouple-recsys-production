@@ -301,4 +301,8 @@ if __name__ == "__main__":
     explorations_categies = load_explorations_model(config.explorations_path)
     top_popular = calc_top_popular(df)
     
-    app.run(host='0.0.0.0', port=5000)
+    try:
+        app.run(host='0.0.0.0', port=5000)
+    except Exception as e:
+        print('main exception occurs:', e)
+        raise e
