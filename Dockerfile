@@ -10,4 +10,6 @@ RUN pip3 install -r /recommendations_server/requirements.txt
 COPY ./start_docker.sh /start_docker.sh
 RUN chmod +x ./start_docker.sh
 
+EXPOSE 5000
+
 CMD ["/bin/bash", "./start_docker.sh"]
