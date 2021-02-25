@@ -1,0 +1,18 @@
+path: '/data/groupLe_recsys/processed/dorama/views_little.csv'
+explorations_path: '/data/groupLe_recsys/processed/dorama/explorational_recs.json'
+port: 5000
+
+regularization: 0.03
+alpha: 40 
+factors: 10
+iterations: 2
+
+site_id: 5
+name: 'dorama'
+   
+recalculate_user_every_n: 10
+min_user_views: 5
+cut_last_k_views: 20
+testing:
+    samples: 15
+    users_n: 700
