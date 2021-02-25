@@ -1,7 +1,7 @@
 FROM python:3.6
 
 RUN mkdir /recommendations_server
-COPY ./recommendations_server/requirements.txt /recommendations_server/requirements.txt
+COPY requirements.txt /recommendations_server/requirements.txt
 
 RUN apt update -y && apt upgrade -y
 RUN apt install -y python3-pip

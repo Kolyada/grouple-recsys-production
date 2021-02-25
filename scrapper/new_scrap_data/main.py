@@ -1,14 +1,9 @@
-import aiohttp
-import asyncio
 import logging
 from time import sleep
-from tqdm import tqdm
 import pymongo
-import requests
 from grouple_session import GroupleSession
 from arqtty_scrapper import requester
-from parser import Parser
-import page_classifier
+from src.data.new_scrap_data.parser import Parser
 
 logging.basicConfig(level=logging.INFO)
 
