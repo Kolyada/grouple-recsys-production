@@ -12,7 +12,7 @@ name: 'dorama'
    
 recalculate_user_every_n: 10
 min_user_views: 5
-cut_last_k_views: 200
+cut_last_k_views: 20
 testing:
     samples: 15
     users_n: 700

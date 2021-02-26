@@ -5,12 +5,25 @@ np.random.seed(2020)
 
 class Loader:
     def __init__(self, data_path):
-        self.data_path = data_path  
-        
+        self.data_path = data_path
+        self.top_popular = None
+
     def get_views(self):
         df = pd.read_csv(self.data_path)
+
+        # cache actual top popular
+        n = 70
+        populars = df.groupby('item_id').count()['rate'].sort_values(ascending=False)
+        populars = populars.index.tolist()
+        self.top_popular = populars[:n]
+
         return df
-        
+
+    def get_top_popular(self):
+        if self.top_popular is None:
+            raise ValueError('Data havent been loaded yet. Cant return top popular')
+        return self.top_popular
+
     def split_train_test(self, df, min_views, test_views):
         assert min_views > test_views
         
