@@ -351,8 +351,8 @@ class RecalculateHandler(RequestHandler):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        raise AttributeError('Use config name to define model config and port to define service port')
-    cfg_path = sys.argv[1]  # 'books_big_setting.yml'
+        raise AttributeError('Use config name to define model config')
+    cfg_path = sys.argv[1]
     config = Hparam(cfg_path)
 
     loader = Loader(config.path)
@@ -363,10 +363,5 @@ if __name__ == "__main__":
 
     app = make_app()
     print("READY")
-    app.listen(5000)
+    app.listen(config.port)
     IOLoop.instance().start()
-    # try:
-    #     app.run(host='0.0.0.0', port=5000)
-    # except Exception as e:
-    #     print('main exception occurs:', e)
-    #     raise e
