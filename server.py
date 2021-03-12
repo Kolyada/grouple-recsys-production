@@ -213,10 +213,9 @@ class RateItemHandler(RequestHandler):
 
         if uix == -1:  # unknown user
             # add user to mapper and update his data
-            print('add user')
             mapper.add_user_id(uid)
             uix = mapper.get_user_ix(uid)
-            model.add_user(uid, user_views=None)
+            model.add_user(uix, user_views=None)
 
         view = pd.DataFrame.from_records([(iix, rate, uix)], columns='item_id rate user_id'.split())
         model.orig_df = model.orig_df.append(view, ignore_index=True)
