@@ -1,0 +1,47 @@
+version: '3.2'
+services:
+
+  book:
+    extends:
+      file: docker-compose-base.yml
+      service: base_recserver
+    ports:
+      - "5001:5000"
+    environment:
+      CONFIG_FILE: "book_setting.yml"
+
+  dorama:
+    extends:
+      file: docker-compose-base.yml
+      service: base_recserver
+    ports:
+      - "5000:5000"
+    environment:
+      CONFIG_FILE: "dorama_setting.yml"
+
+  mint:
+    extends:
+      file: docker-compose-base.yml
+      service: base_recserver
+    ports:
+      - "5003:5000"
+    environment:
+      CONFIG_FILE: "mint_setting.yml"
+
+  read:
+    extends:
+      file: docker-compose-base.yml
+      service: base_recserver
+    ports:
+      - "5002:5000"
+    environment:
+      CONFIG_FILE: "read_setting.yml"
+
+  selfmanga:
+    extends:
+      file: docker-compose-base.yml
+      service: base_recserver
+    ports:
+      - "5013:5000"
+    environment:
+      CONFIG_FILE: "selfmanga_setting.yml"
