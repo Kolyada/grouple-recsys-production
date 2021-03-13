@@ -1,9 +1,9 @@
-version: '2.0'
+version: '2.1'
 
 services:
   base_recserver:
     build: .
     volumes:
-      - /home/iria/grouple/sagiri/:/app/
+      - /home/iria/sagiri/:/app/
       - /data/groupLe_recsys/processed:/data/groupLe_recsys/processed
     command: [ "/bin/bash", "./start_docker.sh" ]
