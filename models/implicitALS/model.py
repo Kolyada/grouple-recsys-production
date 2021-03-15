@@ -145,6 +145,7 @@ class ImplicitALS:
         rowscols = ([0 for _ in iixs], iixs)
         size = (1, self.ui_mat.shape[1])
         # Upd wrapper data
+        assert user <= self.max_uix
         self.ui_mat[user] = csr_matrix((rates, rowscols), shape=size)
 
         # Upd inner model data

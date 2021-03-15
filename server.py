@@ -191,6 +191,9 @@ class RateItemHandler(RequestHandler):
         positive = reqargs['positive']
         rate = reqargs['rate']
 
+        with open('logs/' + config.name + '-usage.log', 'a') as f:
+            f.write('[%s] /rateItem item_id=%s user_id= %s pos=%s\n' % (time(), str(iid), str(uid), str(positive)))
+
         if all(map(lambda v: v is None, (positive, rate))):
             return self.write({'error': 'poitive or rate should be provided', 'args': reqargs})
 

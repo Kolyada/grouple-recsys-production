@@ -4,6 +4,4 @@ services:
   base_recserver:
     build: .
     volumes:
-      - /home/iria/sagiri/:/app/
       - /data/groupLe_recsys/processed:/data/groupLe_recsys/processed
-    command: [ "/bin/bash", "./start_docker.sh" ]
