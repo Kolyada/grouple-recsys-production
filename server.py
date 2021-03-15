@@ -213,10 +213,9 @@ class RateItemHandler(RequestHandler):
 
         if uix == -1:  # unknown user
             # add user to mapper and update his data
-            print('add user')
             mapper.add_user_id(uid)
             uix = mapper.get_user_ix(uid)
-            model.add_user(uid, user_views=None)
+            model.add_user(uix, user_views=None)
 
         view = pd.DataFrame.from_records([(iix, rate, uix)], columns='item_id rate user_id'.split())
         model.orig_df = model.orig_df.append(view, ignore_index=True)
@@ -351,8 +350,8 @@ class RecalculateHandler(RequestHandler):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        raise AttributeError('Use config name to define model config and port to define service port')
-    cfg_path = sys.argv[1]  # 'books_big_setting.yml'
+        raise AttributeError('Use config name to define model config')
+    cfg_path = sys.argv[1]
     config = Hparam(cfg_path)
 
     loader = Loader(config.path)
@@ -365,8 +364,3 @@ if __name__ == "__main__":
     print("READY")
     app.listen(5000)
     IOLoop.instance().start()
-    # try:
-    #     app.run(host='0.0.0.0', port=5000)
-    # except Exception as e:
-    #     print('main exception occurs:', e)
-    #     raise e
