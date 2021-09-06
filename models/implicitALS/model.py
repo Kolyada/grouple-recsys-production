@@ -60,18 +60,26 @@ class ImplicitALS:
     def recommend_user(self, user, k, return_scores=False):
         user_items = self.orig_df[self.orig_df.user_id == user].item_id.tolist()
 
-        # filter liked until len(recs) != given k
-        base_k = k
-        k = int(min(1.5 * k, k + 0.1 * len(user_items)))
-        recs = self.model.recommend(user, self.ui_mat, N=k)
-        recs = self._delete_bookmarks(recs, user_items)
+        if k == -1:
+            # todo: remove duplicate code
+            recs = self.model.recommend(user, self.ui_mat)
+            recs = self._delete_bookmarks(recs, user_items)
+            return
 
-        while len(recs) < base_k:
-            k *= 2
+        else:
+            # filter liked until len(recs) != given k
+            base_k = k
+            k = int(min(1.5 * k, k + 0.1 * len(user_items)))
             recs = self.model.recommend(user, self.ui_mat, N=k)
             recs = self._delete_bookmarks(recs, user_items)
 
-        recs = recs[:base_k]
+            while len(recs) < base_k:
+                k *= 2
+                recs = self.model.recommend(user, self.ui_mat, N=k)
+                recs = self._delete_bookmarks(recs, user_items)
+
+            recs = recs[:base_k]
+
         # return with or without scores
         if not return_scores:
             return [rec[0] for rec in recs]

@@ -1,0 +1,5 @@
+from .exploration_recommendations_handler import ExplorationRecommendationsHandler
+from .personal_similar_items_handler import PersonalSimilarItemsHandler
+from .recommendation_handler import RecommendHandler
+from .similar_items_handler import SimilarItemsHandler
+from .top_popular_recommendation_handler import TopPopularRecommendationHandler

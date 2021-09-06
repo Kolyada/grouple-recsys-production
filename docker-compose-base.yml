@@ -5,3 +5,9 @@ services:
     build: .
     volumes:
       - /data/groupLe_recsys/processed:/data/groupLe_recsys/processed
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "python3", "./healthcheck.py" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
