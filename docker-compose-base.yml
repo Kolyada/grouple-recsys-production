@@ -4,6 +4,10 @@ services:
   base_recserver:
     build: .
     volumes:
-      - /home/iria/sagiri/:/app/
       - /data/groupLe_recsys/processed:/data/groupLe_recsys/processed
-    command: [ "/bin/bash", "./start_docker.sh" ]
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "python3", "./healthcheck.py" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5

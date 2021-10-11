@@ -1,0 +1,21 @@
+path: '/data/groupLe_recsys/processed/selflib/views.csv'
+explorations_path: '/data/groupLe_recsys/processed/selflib/explorational_recs.json'
+port: 5017
+
+regularization: 0.03
+alpha: 40
+factors: 13
+iterations: 15
+
+site_id: 3
+name: 'selflib'
+
+recalculate_user_every_n: 10
+min_user_views: 10
+cut_last_k_views: 200
+testing:
+    samples: 25
+    users_n: 1000
+
+
+note: 'config is a copy of manga. TODO - Calibrate it lately'

@@ -50,11 +50,14 @@ print('na percent', round(df[df.rate.isna()].shape[0]/df.shape[0]*100, 2))
 df = df[~df.rate.isna()]
 
 
-site_ids = {'dorama': 5,
-            'manga':  1,
+site_ids = {'manga':  1,
             'mint': 2,
+            'selfmanga': 3,
+            'dorama': 5,
             'book':   6,
-            'selfmanga': 3}
+            'selflib': 7,
+            'rumix': 8
+            }
 for site_name, site_id in site_ids.items():
     print('\nSeparating %s data' % site_name)
     sub_df = df[df.site_id == site_id]
