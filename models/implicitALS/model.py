@@ -64,7 +64,7 @@ class ImplicitALS:
             # todo: remove duplicate code
             recs = self.model.recommend(user, self.ui_mat)
             recs = self._delete_bookmarks(recs, user_items)
-            return
+            return recs
 
         else:
             # filter liked until len(recs) != given k
@@ -78,7 +78,7 @@ class ImplicitALS:
                 recs = self.model.recommend(user, self.ui_mat, N=k)
                 recs = self._delete_bookmarks(recs, user_items)
 
-            recs = recs[:base_k]
+            recs = recs[:k]
 
         # return with or without scores
         if not return_scores:
