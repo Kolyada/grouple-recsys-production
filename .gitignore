@@ -2,6 +2,7 @@ data/raw/
 data/interium/
 data/processed/
 data/external
+./**/*.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -2,6 +2,7 @@ import sys
 from tornado.ioloop import IOLoop
 from tornado.web import Application
 from yamlparams.utils import Hparam
+from loguru import logger
 from models.implicitALS.dataloader import Loader
 from models.implicitALS.singleton import SharedModel
 from http_utils import recs, updating, misc
@@ -27,6 +28,7 @@ if __name__ == "__main__":
         raise AttributeError('Use config name to define model config')
     cfg_path = sys.argv[1]
     config = Hparam(cfg_path)
+    logger.add('logs/' + config.name + '-usage.log')
 
     loader = Loader(config.path)
     updating.recalculate_handler.prepare_model(loader, config)

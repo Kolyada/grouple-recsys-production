@@ -4,7 +4,6 @@ from webargs import fields
 from webargs.tornadoparser import use_args
 from loguru import logger
 from http_utils.base import BaseHandler, MAX_THREADS
-from .top_popular_recommendation_handler import TopPopularRecommendationHandler
 
 
 class RecommendHandler(BaseHandler):
@@ -26,8 +25,8 @@ class RecommendHandler(BaseHandler):
 
         model, mapper = self.get_model_and_mapper()
 
-        with open('logs/' + self.config.name + '-usage.log', 'a') as f:
-            logger.info(f'recommend user_id={uid} n_recs={n_rec}')
+        # with open('logs/' + self.config.name + '-usage.log', 'a') as f:
+        logger.info(f'recommend user_id={uid} n_recs={n_rec}')
 
         # Handle broken user_id
         make_item = lambda idx, score: {'itemId': idx,  'siteId':  self.config.site_id, 'score': score,
