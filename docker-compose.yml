@@ -54,7 +54,7 @@ services:
       - "5017:5000"
     environment:
       CONFIG_FILE: "selflib_setting.yml"
-    network_mode: "host"
+#    network_mode: "host"
 
   rumix:
     extends:
