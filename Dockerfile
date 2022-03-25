@@ -7,9 +7,9 @@ WORKDIR /app
 COPY *.sh /app/
 RUN chmod +x /app/start_docker.sh
 
-COPY requirements.txt /app/
 RUN apt update -y && apt upgrade -y
 RUN apt install -y python3-pip
+COPY requirements.txt /app/
 RUN pip3 install -r /app/requirements.txt
 
 COPY database /app/database

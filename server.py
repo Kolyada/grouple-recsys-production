@@ -31,7 +31,7 @@ if __name__ == "__main__":
     config = Hparam(cfg_path)
     logger.add('logs/' + config.name + '-server.log')
 
-    db_config = Hparam('/database/config.yaml')
+    db_config = Hparam('/app/database/config.yaml')
     connect = Connect(db_config.user, db_config.password, db_config.database)
     loader = Loader(config.site_id,connect)
     
