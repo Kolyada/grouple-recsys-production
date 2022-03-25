@@ -7,7 +7,7 @@ alpha: 40
 factors: 13
 iterations: 15
 
-site_id: 3
+site_id: 8
 name: 'rumix'
 
 recalculate_user_every_n: 10
