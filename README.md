@@ -21,9 +21,11 @@ sudo docker-compose -f docker-compose.yml restart rumix
 
 sudo docker-compose -f docker-compose.yml up -d -V --build --remove-orphans
 
+
+### Single container update
 ```
-docker-compose stop -t 1 worker
-docker-compose build worker
-docker-compose up --no-start worker
-docker-compose start worker
+docker-compose stop selflib
+docker-compose build selflib
+docker-compose up --no-start selflib
+docker-compose start selflib
 ```
