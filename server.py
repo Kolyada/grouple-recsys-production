@@ -6,6 +6,7 @@ from loguru import logger
 from models.implicitALS.dataloader import Loader
 from models.implicitALS.singleton import SharedModel
 from http_utils import recs, updating, misc
+from database.connect import Connect
 
 
 def make_app():
@@ -30,7 +31,10 @@ if __name__ == "__main__":
     config = Hparam(cfg_path)
     logger.add('logs/' + config.name + '-usage.log')
 
-    loader = Loader(config.path)
+    db_config = Hparam('database/config.yaml')
+    connect = Connect(db_config.user, db_config.password, db_config.database)
+    loader = Loader(config.site_id,connect)
+    
     updating.recalculate_handler.prepare_model(loader, config)
 
     explorations_categies = updating.load_explorations_model(config.explorations_path)

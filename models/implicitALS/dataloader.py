@@ -3,13 +3,28 @@ from tqdm import tqdm
 import numpy as np
 np.random.seed(2020)
 
+
+
 class Loader:
-    def __init__(self, data_path):
-        self.data_path = data_path
+    def __init__(self, site_id, connect):
+        self.site_id = site_id
+        self.connect = connect
         self.top_popular = None
 
     def get_views(self):
-        df = pd.read_csv(self.data_path)
+        sql = """select element_id as item_id,rate,user_id 
+            from bookmark 
+            where site_id = %s and coalesce(rate,-1)>=0
+
+            union all
+
+            select element_id, positive*10 as rate,user_id
+            from likes
+            where site_id = %s"""
+
+        con = self.connect.get_con()
+        df = pd.read_sql(sql, con, params = (self.site_id,self.site_id))
+        con.close()
 
         # cache actual top popular
         n = 70
