@@ -12,4 +12,18 @@ Web scrapper for collecting user bookmarks data included
 Models:
  - implicit ALS for item recommendation
  - tSNE + Agglomerative clustering / DBSCAN for initial item recommendations
- 
+
+
+> sudo docker-compose -f docker-compose.yml up -d --build
+> sudo docker-compose -f docker-compose-selflib.yml up -d --build
+
+sudo docker-compose -f docker-compose.yml restart rumix
+
+sudo docker-compose -f docker-compose.yml up -d -V --build --remove-orphans
+
+```
+docker-compose stop -t 1 worker
+docker-compose build worker
+docker-compose up --no-start worker
+docker-compose start worker
+```
