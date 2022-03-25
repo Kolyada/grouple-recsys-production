@@ -1,3 +1,4 @@
 user: recommend
 password: 1
+host: localhost
 database: recommend
