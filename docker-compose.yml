@@ -46,14 +46,14 @@ services:
     environment:
       CONFIG_FILE: "selfmanga_setting.yml"
 
-  selflib:
-    extends:
-      file: docker-compose-base.yml
-      service: base_recserver
-    ports:
-      - "5017:5000"
-    environment:
-      CONFIG_FILE: "selflib_setting.yml"
+#  selflib:
+#    extends:
+#      file: docker-compose-base.yml
+#      service: base_recserver
+#    ports:
+#      - "5017:5000"
+#    environment:
+#      CONFIG_FILE: "selflib_setting.yml"
 
   rumix:
     extends:

@@ -1,0 +1,10 @@
+version: '2.1'
+services:
+  selflib:
+    extends:
+      file: docker-compose-base.yml
+      service: base_recserver
+    ports:
+      - "5017:5000"
+    environment:
+      CONFIG_FILE: "selflib_setting.yml"

@@ -5,7 +5,7 @@ services:
     build: .
     volumes:
       - /data/groupLe_recsys/processed:/data/groupLe_recsys/processed
-      - ./logs/:/app/logs/
+      - /var/logs/recommend/:/app/logs/
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "python3", "./healthcheck.py" ]

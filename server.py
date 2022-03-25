@@ -29,9 +29,9 @@ if __name__ == "__main__":
         raise AttributeError('Use config name to define model config')
     cfg_path = sys.argv[1]
     config = Hparam(cfg_path)
-    logger.add('logs/' + config.name + '-usage.log')
+    logger.add('logs/' + config.name + '-server.log')
 
-    db_config = Hparam('database/config.yaml')
+    db_config = Hparam('/database/config.yaml')
     connect = Connect(db_config.user, db_config.password, db_config.database)
     loader = Loader(config.site_id,connect)
     
