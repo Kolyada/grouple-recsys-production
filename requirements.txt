@@ -12,3 +12,4 @@ tornado~=6.1
 webargs~=7.0.1
 setuptools~=51.1.1
 loguru
+mysql
