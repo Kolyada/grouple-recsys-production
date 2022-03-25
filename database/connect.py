@@ -14,5 +14,4 @@ class Connect:
             password = self.password, 
             host = self.host,
             database = self.database
-            auth_plugin = 'mysql_native_password'
             )
