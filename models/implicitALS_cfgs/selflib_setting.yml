@@ -7,7 +7,7 @@ alpha: 40
 factors: 13
 iterations: 15
 
-site_id: 3
+site_id: 7
 name: 'selflib'
 
 recalculate_user_every_n: 10

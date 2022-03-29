@@ -1,0 +1,4 @@
+user: recommend
+password: '1'
+host: host.docker.internal
+database: recommend
