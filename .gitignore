@@ -3,6 +3,7 @@ data/interium/
 data/processed/
 data/external
 ./**/*.csv
+*.bat
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

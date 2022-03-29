@@ -5,6 +5,7 @@ from tornado.concurrent import run_on_executor
 from models.implicitALS.model import ImplicitALS
 from models.implicitALS.preprocessor import Preprocessor
 from http_utils.base import BaseHandler, MIN_THREADS
+from http_utils.updating.explorations_utils import load_explorations_model
 from models.implicitALS.singleton import SharedModel
 
 
@@ -19,16 +20,13 @@ class RecalculateHandler(BaseHandler):
     def get(self):
         # Updates recommender model and top popular list
         # If current views table is too old, recalc dump and fetch fresh data from it
-        curr_timestamp = int(dt.now().timestamp())
-        last_modified = int(os.stat(self.config.path).st_mtime)
-        if abs(curr_timestamp - last_modified) > 3600:  # older then 1 hour
-            os.system(
-                "mysqldump -uroot -proot recommend bookmark > /data/groupLe_recsys/raw/all-recommender-users.sql")
-            os.system("mysqldump -uroot -proot recommend likes > /data/groupLe_recsys/raw/likes.sql")
-            os.system("python3 ../src/features/unpack_data.py")
-
+        if self.loader.is_loading_required():
             prepare_model(self.loader, self.config)
-        return self.write({'status': 'ok', 'lastDataUpdateTimestamp': last_modified})
+            if self.loader.explorations_categies is None:
+                self.loader.explorations_categies = load_explorations_model(self.config.explorations_path)
+            curr_timestamp = int(dt.now().timestamp())
+            self.loader.loaded_timestamp = curr_timestamp
+        return self.write({'status': 'ok', 'lastDataUpdateTimestamp': self.loader.loaded_timestamp})
 
 
 def prepare_model(loader, config):
