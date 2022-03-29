@@ -10,7 +10,7 @@ class ExplorationRecommendationsHandler(BaseHandler):
     executor = ThreadPoolExecutor(MAX_THREADS)
 
     def initialize(self, **kwargs):
-        self.explorations_categies = kwargs['explorations_categies']
+        self.loader = kwargs['loader']
         super().initialize(**kwargs)
 
     def local2global_ids(self, expl_obj):
@@ -55,14 +55,14 @@ class ExplorationRecommendationsHandler(BaseHandler):
         if uix == -1:  # unknown user
             return self.write({'categories': self.cats2list(
                 self.ids2items(
-                    self.local2global_ids(self.explorations_categies)))})
+                    self.local2global_ids(self.loader.explorations_categies)))})
         else:  # known user
             viewed_items = set(model.orig_df[model.orig_df.user_id == uix]['item_id'].tolist())
             # delete viewed items and empty categories from categories lists
             filtred_explorations = dict()
-            for cat in self.explorations_categies.keys():
+            for cat in self.loader.explorations_categies.keys():
                 # categories items are in local ids format. Dont forget to map to foreign ids when responsing
-                filtred_items = [idx for idx in self.explorations_categies[cat] if idx not in viewed_items]
+                filtred_items = [idx for idx in self.loader.explorations_categies[cat] if idx not in viewed_items]
                 if len(filtred_items):
                     filtred_explorations[cat] = filtred_items
             return self.write({'categories': self.cats2list(

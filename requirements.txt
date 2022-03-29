@@ -13,3 +13,5 @@ webargs~=7.0.1
 setuptools~=51.1.1
 loguru
 mysql-connector-python-rf
+asyncio
+aiohttp

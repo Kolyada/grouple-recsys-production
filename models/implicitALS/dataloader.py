@@ -1,6 +1,7 @@
 import pandas as pd
 from tqdm import tqdm
 import numpy as np
+from datetime import datetime as dt
 np.random.seed(2020)
 
 
@@ -10,6 +11,8 @@ class Loader:
         self.site_id = site_id
         self.connect = connect
         self.top_popular = None
+        self.loaded_timestamp = None
+        self.explorations_categies = None
 
     def get_views(self):
         sql = """select element_id as item_id,rate,user_id 
@@ -33,6 +36,12 @@ class Loader:
         self.top_popular = populars[:n]
 
         return df
+
+    def is_loading_required(self,obsolete_in_seconds = 3600):
+        if self.loaded_timestamp is None:
+            return True 
+        curr_timestamp = int(dt.now().timestamp())
+        return abs(curr_timestamp - self.loaded_timestamp) > obsolete_in_seconds
 
     def get_top_popular(self):
         if self.top_popular is None:

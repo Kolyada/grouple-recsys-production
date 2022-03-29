@@ -10,7 +10,7 @@ class RecommendHandler(BaseHandler):
     executor = ThreadPoolExecutor(MAX_THREADS)
 
     def initialize(self, **kwargs):
-        self.top_popular = kwargs['top_popular']
+        self.loader = kwargs['loader']
         super().initialize(**kwargs)
 
     @run_on_executor()
@@ -45,7 +45,7 @@ class RecommendHandler(BaseHandler):
             recs = [make_item(idx, float(score)) for idx, score in items]
         except KeyError:
             is_top_popular = 1
-            recs = [make_item(idx, None) for idx in self.top_popular[:n_rec]]
+            recs = [make_item(idx, None) for idx in self.loader.top_popular[:n_rec]]
 
         return self.write({'isTopPop': is_top_popular, 'items': recs, 'args': reqargs,
                            'is_top_pop': is_top_popular})

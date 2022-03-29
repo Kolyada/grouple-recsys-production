@@ -10,11 +10,11 @@ class TopPopularRecommendationHandler(BaseHandler):
     executor = ThreadPoolExecutor(MAX_THREADS)
 
     def initialize(self, **kwargs):
-        self.top_popular = kwargs['top_popular']
+        self.loader = kwargs['loader']
         super().initialize(**kwargs)
 
     def get_top_popular(self, n):
-        return self.top_popular[:n]
+        return self.loader.top_popular[:n]
 
     @run_on_executor()
     @use_args({'n_recs': fields.Int(required=False, missing=20)}, location='querystring')
