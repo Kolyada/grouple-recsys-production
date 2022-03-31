@@ -28,10 +28,10 @@ def make_app():
             ('/healthcheck', misc.HealthcheckHandler)]
     return Application(urls)
 
-async def async_test(delay):
+async def async_test(delay, port):
     await asyncio.sleep(delay)
     async with aiohttp.ClientSession() as session:
-        async with session.get('http://localhost:5000/recalculate') as response:
+        async with session.get(f'http://localhost:{port}/recalculate') as response:
             html = await response.text()
             print(html)
 
@@ -41,14 +41,15 @@ if __name__ == "__main__":
     cfg_path = sys.argv[1]
     config = Hparam(cfg_path)
     logger.add('logs/' + config.name + '-server.log')
+    port = config.get('port',5000)
 
     db_config = Hparam('/app/database/config.yaml')
     connect = Connect(db_config.user, db_config.password, db_config.host, db_config.database)
     loader = Loader(config.site_id,connect)
     
     app = make_app()
-    print("READY")
-    app.listen(5000)
+    print(f"READY at port: {port}")
+    app.listen(port)
 
-    IOLoop.instance().spawn_callback(async_test, delay = 30)
+    IOLoop.instance().spawn_callback(async_test, delay = 30, port = port)
     IOLoop.instance().start()
